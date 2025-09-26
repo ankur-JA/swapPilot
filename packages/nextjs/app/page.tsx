@@ -5,9 +5,13 @@ import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { ArrowsUpDownIcon } from "@heroicons/react/24/outline";
 import { Card, RouteVisualizer, SwapRoute, Token, TokenInput } from "~~/components/swappilot";
+import { useTransactor } from "~~/hooks/scaffold-eth/useTransactor";
+import { use1inchApi } from "~~/hooks/swappilot";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
+  const { getQuote, getSwapTransaction, isLoading: apiLoading, error: apiError } = use1inchApi();
+  const transactor = useTransactor();
 
   // State for swap interface
   const [fromToken, setFromToken] = useState<Token | null>(null);
@@ -16,6 +20,8 @@ const Home: NextPage = () => {
   const [toAmount, setToAmount] = useState("");
   const [swapRoute, setSwapRoute] = useState<SwapRoute | null>(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [, setSwapTransaction] = useState<any>(null);
+  const [isExecutingSwap, setIsExecutingSwap] = useState(false);
 
   // Toggle swap direction
   const handleSwapDirection = () => {
@@ -29,38 +35,88 @@ const Home: NextPage = () => {
     setSwapRoute(null); // Clear route when direction changes
   };
 
-  // Get quote (placeholder for now)
+  // Get quote from 1inch API
   const handleGetQuote = async () => {
     if (!fromToken || !toToken || !fromAmount) return;
 
     setIsLoadingQuote(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      // Mock route data
-      const mockRoute: SwapRoute = {
-        fromToken: { symbol: fromToken.symbol, address: fromToken.address },
-        toToken: { symbol: toToken.symbol, address: toToken.address },
-        protocols: [
-          { name: "Uniswap V3", part: 70 },
-          { name: "SushiSwap", part: 30 },
-        ],
-        estimatedGas: "0.002",
-        priceImpact: 0.5,
-      };
+    try {
+      const quote = await getQuote({
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        amount: fromAmount,
+        fromAddress: connectedAddress,
+        slippage: 1, // 1% slippage
+      });
 
-      setSwapRoute(mockRoute);
-      setToAmount((parseFloat(fromAmount) * 0.95).toString()); // Mock conversion
+      if (quote) {
+        // Transform 1inch quote to our SwapRoute format
+        const route: SwapRoute = {
+          fromToken: quote.fromToken,
+          toToken: quote.toToken,
+          protocols: quote.protocols.map(p => ({
+            name: p.name,
+            part: p.part,
+          })),
+          estimatedGas: quote.estimatedGas,
+          priceImpact: quote.priceImpact,
+        };
+
+        setSwapRoute(route);
+        // Convert wei to token amount (simplified)
+        const toAmountFormatted = (parseFloat(quote.toTokenAmount) / Math.pow(10, quote.toToken.decimals)).toString();
+        setToAmount(toAmountFormatted);
+      }
+    } catch (error) {
+      console.error("Failed to get quote:", error);
+    } finally {
       setIsLoadingQuote(false);
-    }, 1000);
+    }
   };
 
-  // Execute swap (placeholder for now)
+  // Execute swap using 1inch API and Wagmi
   const handleSwap = async () => {
-    if (!swapRoute) return;
+    if (!swapRoute || !fromToken || !toToken || !connectedAddress) return;
 
-    // TODO: Implement actual swap logic with 1inch API and Wagmi
-    console.log("Executing swap:", { fromToken, toToken, fromAmount, toAmount, route: swapRoute });
+    setIsExecutingSwap(true);
+
+    try {
+      // Get swap transaction from 1inch API
+      const swapTx = await getSwapTransaction({
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        amount: fromAmount,
+        fromAddress: connectedAddress,
+        slippage: 1, // 1% slippage
+      });
+
+      if (swapTx) {
+        setSwapTransaction(swapTx);
+
+        // Execute the transaction using the transactor
+        const txHash = await transactor({
+          to: swapTx.tx.to as `0x${string}`,
+          data: swapTx.tx.data as `0x${string}`,
+          value: BigInt(swapTx.tx.value),
+          gas: BigInt(swapTx.tx.gas),
+          gasPrice: BigInt(swapTx.tx.gasPrice),
+        });
+
+        if (txHash) {
+          console.log("Swap transaction submitted:", txHash);
+          // Reset form after successful swap
+          setFromAmount("");
+          setToAmount("");
+          setSwapRoute(null);
+          setSwapTransaction(null);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to execute swap:", error);
+    } finally {
+      setIsExecutingSwap(false);
+    }
   };
 
   return (
@@ -106,13 +162,20 @@ const Home: NextPage = () => {
               placeholder="0.0"
             />
 
+            {/* API Error Display */}
+            {apiError && (
+              <div className="alert alert-error">
+                <span>Error: {apiError}</span>
+              </div>
+            )}
+
             {/* Get Quote Button */}
             <button
               onClick={handleGetQuote}
               className="btn btn-primary w-full"
-              disabled={!fromToken || !toToken || !fromAmount || isLoadingQuote}
+              disabled={!fromToken || !toToken || !fromAmount || isLoadingQuote || apiLoading}
             >
-              {isLoadingQuote ? (
+              {isLoadingQuote || apiLoading ? (
                 <>
                   <span className="loading loading-spinner loading-sm"></span>
                   Getting Quote...
@@ -126,8 +189,21 @@ const Home: NextPage = () => {
             <RouteVisualizer route={swapRoute} isLoading={isLoadingQuote} />
 
             {/* Swap Button */}
-            <button onClick={handleSwap} className="btn btn-success w-full" disabled={!swapRoute || !connectedAddress}>
-              {!connectedAddress ? "Connect Wallet to Swap" : "Swap"}
+            <button
+              onClick={handleSwap}
+              className="btn btn-success w-full"
+              disabled={!swapRoute || !connectedAddress || isExecutingSwap || apiLoading}
+            >
+              {!connectedAddress ? (
+                "Connect Wallet to Swap"
+              ) : isExecutingSwap ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Executing Swap...
+                </>
+              ) : (
+                "Swap"
+              )}
             </button>
           </Card>
 
