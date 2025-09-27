@@ -34,6 +34,10 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.baseSepolia.id]: "base-sepolia",
   [chains.celo.id]: "celo-mainnet",
   [chains.celoSepolia.id]: "celo-sepolia",
+  [chains.avalanche.id]: "avax-mainnet",
+  [chains.bsc.id]: "bsc-mainnet",
+  [chains.gnosis.id]: "gnosis-mainnet",
+  // ZkSync Era (324) - not supported by Alchemy yet
 };
 
 export const getAlchemyHttpUrl = (chainId: number) => {
@@ -89,6 +93,19 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   },
   [chains.celoSepolia.id]: {
     color: "#476520",
+  },
+  [chains.avalanche.id]: {
+    color: "#e84142",
+  },
+  [chains.bsc.id]: {
+    color: "#f3ba2f",
+  },
+  [chains.base.id]: {
+    color: "#0052ff",
+  },
+  // ZkSync Era (324) - custom chain
+  324: {
+    color: "#4e529a",
   },
 };
 
