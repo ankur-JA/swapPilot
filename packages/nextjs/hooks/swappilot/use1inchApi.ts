@@ -115,6 +115,18 @@ export const use1inchApi = (): Use1inchApiReturn => {
         // Use the amount as-is (already in wei format from parseUnits)
         const amountInWei = amount;
 
+        console.log("1inch API request:", {
+          url: `${ONEINCH_API_BASE}/quote`,
+          params: {
+            fromTokenAddress,
+            toTokenAddress,
+            amount: amountInWei,
+            ...(fromAddress && { fromAddress }),
+            slippage,
+          },
+          hasApiKey: !!ONEINCH_API_KEY,
+        });
+
         const response = await axios.get(`${ONEINCH_API_BASE}/quote`, {
           params: {
             fromTokenAddress,
@@ -129,6 +141,7 @@ export const use1inchApi = (): Use1inchApiReturn => {
         });
 
         const data = response.data;
+        console.log("1inch API response:", data);
 
         // Transform the response to match our interface
         const quote: QuoteResponse = {

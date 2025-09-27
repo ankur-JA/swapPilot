@@ -83,12 +83,22 @@ const Swap: NextPage = () => {
 
     try {
       const amount = parseUnits(fromAmount, fromToken.decimals).toString();
+
+      console.log("Getting quote with params:", {
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        amount,
+        fromAddress: address,
+      });
+
       const quoteData = await getQuote({
         fromTokenAddress: fromToken.address,
         toTokenAddress: toToken.address,
         amount,
         fromAddress: address,
       });
+
+      console.log("Quote response:", quoteData);
 
       if (quoteData) {
         setQuote(quoteData);
@@ -97,9 +107,13 @@ const Swap: NextPage = () => {
         setError("No quote available for this swap");
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.description || err?.message || "Failed to get quote. Please try again.";
+      console.error("Quote error details:", err);
+      const errorMessage =
+        err?.response?.data?.description ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to get quote. Please try again.";
       setError(errorMessage);
-      console.error("Quote error:", err);
     } finally {
       setIsLoadingQuote(false);
     }
@@ -201,7 +215,6 @@ const Swap: NextPage = () => {
                   selectedToken={toToken}
                   onTokenSelect={setToToken}
                   placeholder="0.0"
-                  disabled
                 />
 
                 {/* Slippage Settings */}
