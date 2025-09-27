@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Setup node env
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -30,18 +30,41 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       
-      - name: Install foundry-toolchain
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
+      - name: Install foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          source ~/.bashrc
+          foundryup
 
-      - name: Run foundry node, deploy contracts (& generate contracts typescript output)
-        env:
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: yarn chain & yarn deploy
+      - name: Compile contracts
+        run: yarn foundry:compile
+
+      - name: Run foundry tests
+        run: yarn foundry:test
+
+      - name: Run foundry lint
+        run: yarn foundry:lint
+
+      - name: Deploy contracts (generate TypeScript types)
+        run: |
+          # Start anvil in background
+          yarn foundry:chain &
+          ANVIL_PID=$!
+          
+          # Wait for anvil to start
+          sleep 10
+          
+          # Deploy contracts
+          yarn foundry:deploy
+          
+          # Stop anvil
+          kill $ANVIL_PID
 
       - name: Run nextjs lint
         run: yarn next:lint --max-warnings=0
 
       - name: Check typings on nextjs
         run: yarn next:check-types
+
+      - name: Build nextjs app
+        run: yarn next:build
