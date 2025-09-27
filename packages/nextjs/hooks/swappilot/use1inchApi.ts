@@ -86,7 +86,7 @@ export const get1inchApiBase = (chainId: number) => {
 };
 
 // Debug function to test API connectivity
-export const testApiConnection = async (chainId: number = 1) => {
+export const testApiConnection = async (chainId: number) => {
   try {
     const apiBase = get1inchApiBase(chainId);
     const response = await axios.get(`${apiBase}/tokens`, {
