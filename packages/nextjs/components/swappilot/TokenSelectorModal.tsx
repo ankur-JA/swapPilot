@@ -1,36 +1,31 @@
-import { useMemo, useState } from "react";
-import { Token } from "./TokenInput";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+"use client";
 
-interface TokenSelectorModalProps {
+import { useState, ChangeEvent } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Token } from "./TokenInput";
+
+type TokenSelectorModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onTokenSelect: (token: Token) => void;
-  selectedToken: Token | null;
-}
+  onSelectToken: (token: Token) => void;
+  selectedToken?: Token | null;
+};
 
-// Hardcoded list of popular tokens
+// Hardcoded popular tokens for now
 const POPULAR_TOKENS: Token[] = [
   {
     symbol: "ETH",
     name: "Ethereum",
-    address: "0x0000000000000000000000000000000000000000",
+    address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
     decimals: 18,
     logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
   },
   {
-    symbol: "WETH",
-    name: "Wrapped Ethereum",
-    address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    decimals: 18,
-    logoURI: "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
-  },
-  {
     symbol: "USDC",
     name: "USD Coin",
-    address: "0xA0b86a33E6441b8c4C8C0E4A0b86a33E6441b8c4C",
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     decimals: 6,
-    logoURI: "https://tokens.1inch.io/0xa0b86a33e6441b8c4c8c0e4a0b86a33e6441b8c4c.png",
+    logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
   },
   {
     symbol: "DAI",
@@ -42,75 +37,60 @@ const POPULAR_TOKENS: Token[] = [
   {
     symbol: "WBTC",
     name: "Wrapped Bitcoin",
-    address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    address: "0x2260FAC549599087599fE8Bc6f2bA069b66Cc2f4",
     decimals: 8,
-    logoURI: "https://tokens.1inch.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png",
+    logoURI: "https://tokens.1inch.io/0x2260fac549599087599fe8bc6f2ba069b66cc2f4.png",
   },
 ];
 
-export const TokenSelectorModal = ({ isOpen, onClose, onTokenSelect, selectedToken }: TokenSelectorModalProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+export const TokenSelectorModal = ({ isOpen, onClose, onSelectToken, selectedToken }: TokenSelectorModalProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTokens = useMemo(() => {
-    if (!searchQuery) return POPULAR_TOKENS;
-
-    return POPULAR_TOKENS.filter(
-      token =>
-        token.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        token.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [searchQuery]);
+  const filteredTokens = POPULAR_TOKENS.filter(token =>
+    token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    token.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-base-100 rounded-box p-6 w-full max-w-md shadow-xl relative">
+        <button onClick={onClose} className="btn btn-sm btn-circle absolute right-3 top-3">
+          <XMarkIcon className="h-5 w-5" />
+        </button>
+        <h2 className="text-2xl font-bold mb-4 text-center">Select Token</h2>
 
-      {/* Modal */}
-      <div className="relative bg-base-100 rounded-box p-6 w-full max-w-md mx-4 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-base-content">Select Token</h2>
-          <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle">
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Search token by symbol or name"
+          className="input input-bordered w-full mb-4"
+          value={searchTerm}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+        />
 
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-accent" />
-          <input
-            type="text"
-            placeholder="Search tokens..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="input input-bordered w-full pl-10"
-          />
-        </div>
-
-        {/* Token List */}
-        <div className="max-h-80 overflow-y-auto space-y-2">
+        <div className="max-h-80 overflow-y-auto">
           {filteredTokens.length === 0 ? (
-            <div className="text-center py-8 text-accent">No tokens found</div>
+            <p className="text-center text-accent">No tokens found.</p>
           ) : (
-            filteredTokens.map(token => (
-              <button
-                key={token.address}
-                onClick={() => onTokenSelect(token)}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors ${
-                  selectedToken?.address === token.address ? "bg-primary/10 border border-primary" : ""
-                }`}
-              >
-                {token.logoURI && <img src={token.logoURI} alt={token.symbol} className="w-8 h-8 rounded-full" />}
-                <div className="flex-1 text-left">
-                  <div className="font-medium text-base-content">{token.symbol}</div>
-                  <div className="text-sm text-accent">{token.name}</div>
-                </div>
-                {selectedToken?.address === token.address && <div className="text-primary">✓</div>}
-              </button>
-            ))
+            <ul className="space-y-2">
+              {filteredTokens.map(token => (
+                <li key={token.address}>
+                  <button
+                    className="flex items-center gap-3 p-2 w-full hover:bg-base-200 rounded-lg transition-colors"
+                    onClick={() => onSelectToken(token)}
+                  >
+                    {token.logoURI && (
+                      <img src={token.logoURI} alt={token.symbol} className="h-8 w-8 rounded-full" />
+                    )}
+                    <div>
+                      <p className="font-semibold">{token.symbol}</p>
+                      <p className="text-sm text-accent-content">{token.name}</p>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

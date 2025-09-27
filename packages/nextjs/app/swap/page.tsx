@@ -13,7 +13,7 @@ import {
   Token,
   TokenInput,
 } from "~~/components/swappilot";
-import { TOKEN_ADDRESSES, testApiConnection, use1inchApi } from "~~/hooks/swappilot";
+import { TOKEN_ADDRESSES, use1inchApi } from "~~/hooks/swappilot";
 
 const Swap: NextPage = () => {
   const { address } = useAccount();
@@ -40,28 +40,12 @@ const Swap: NextPage = () => {
         name: "Ethereum",
         address: chainTokens.ETH,
         decimals: 18,
-        logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
-      },
-      {
-        symbol: "WETH",
-        name: "Wrapped Ethereum",
-        address: chainTokens.WETH,
-        decimals: 18,
-        logoURI: "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
       },
       {
         symbol: "USDC",
         name: "USD Coin",
         address: chainTokens.USDC,
         decimals: 6,
-        logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
-      },
-      {
-        symbol: "DAI",
-        name: "Dai Stablecoin",
-        address: chainTokens.DAI,
-        decimals: 18,
-        logoURI: "https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
       },
     ];
   }, [selectedChain.id]);
@@ -73,9 +57,6 @@ const Swap: NextPage = () => {
     if (defaultTokens.length > 1 && !toToken) {
       setToToken(defaultTokens[1]);
     }
-
-    // Test API connection on component mount
-    testApiConnection(selectedChain.id);
   }, [defaultTokens, fromToken, toToken, selectedChain.id]);
 
   const handleGetQuote = async () => {
@@ -95,14 +76,6 @@ const Swap: NextPage = () => {
     try {
       const amount = parseUnits(fromAmount, fromToken.decimals).toString();
 
-      console.log("Getting quote with params:", {
-        chainId: selectedChain.id,
-        fromTokenAddress: fromToken.address,
-        toTokenAddress: toToken.address,
-        amount,
-        fromAddress: address,
-      });
-
       const quoteData = await getQuote({
         chainId: selectedChain.id,
         fromTokenAddress: fromToken.address,
@@ -110,8 +83,6 @@ const Swap: NextPage = () => {
         amount,
         fromAddress: address,
       });
-
-      console.log("Quote response:", quoteData);
 
       if (quoteData) {
         setQuote(quoteData);

@@ -5,6 +5,7 @@ import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { ArrowsRightLeftIcon, BoltIcon, ShieldCheckIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
+import { SwapPilotLogo } from "~~/components/swappilot";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -19,11 +20,9 @@ const Home: NextPage = () => {
             <div className="text-center">
               {/* Main Heading */}
               <div className="mb-8">
-                <h1 className="text-5xl md:text-7xl font-bold mb-6">
-                  <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                    SwapPilot
-                  </span>
-                </h1>
+                <div className="flex justify-center mb-6">
+                  <SwapPilotLogo size="xl" showText={true} />
+                </div>
                 <p className="text-2xl md:text-3xl font-semibold text-base-content/80 mb-4">
                   The Smartest Way to Swap Crypto
                 </p>

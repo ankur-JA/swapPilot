@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { SwapPilotLogo } from "~~/components/swappilot";
 
 type HeaderMenuLink = {
   label: string;
@@ -98,20 +99,7 @@ export const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative w-10 h-10">
-              <Image
-                alt="SwapPilot logo"
-                className="cursor-pointer transition-transform group-hover:scale-110"
-                fill
-                src="/logo.svg"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                SwapPilot
-              </span>
-              <span className="text-xs text-base-content/60 -mt-1">Smart Crypto Swapping</span>
-            </div>
+            <SwapPilotLogo size="md" showText={true} className="transition-transform group-hover:scale-105" />
           </Link>
 
           {/* Desktop Navigation */}

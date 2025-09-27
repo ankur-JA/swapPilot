@@ -84,7 +84,7 @@ export const TokenInput = ({
       <TokenSelectorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onTokenSelect={handleTokenSelect}
+        onSelectToken={handleTokenSelect}
         selectedToken={selectedToken}
       />
     </div>
