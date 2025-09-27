@@ -15,12 +15,26 @@ Create a `.env.local` file in the `packages/nextjs/` directory with your API key
 # 1inch API Configuration
 NEXT_PUBLIC_1INCH_API_KEY=your_1inch_api_key_here
 
-# Chain Configuration (optional)
-NEXT_PUBLIC_CHAIN_ID=1
+# Chain Configuration - Sepolia testnet
+NEXT_PUBLIC_CHAIN_ID=11155111
 
 # Demo Mode (optional)
 NEXT_PUBLIC_DEMO_MODE=false
 ```
+
+## Sepolia Testnet Setup
+
+The application is configured to use Sepolia testnet by default. Make sure your wallet is connected to Sepolia testnet.
+
+### Sepolia Testnet Details:
+- **Chain ID**: 11155111
+- **RPC URL**: https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+- **Block Explorer**: https://sepolia.etherscan.io/
+
+### Getting Sepolia ETH:
+1. Visit [Sepolia Faucet](https://sepoliafaucet.com/)
+2. Enter your wallet address
+3. Request test ETH for gas fees
 
 ## API Key Benefits
 

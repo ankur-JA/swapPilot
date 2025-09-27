@@ -1,17 +1,18 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 
-// 1inch API base URL
-const ONEINCH_API_BASE = "https://api.1inch.io/v5.0/1";
+// 1inch API base URL - Using Sepolia testnet (chainId: 11155111)
+const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "11155111";
+const ONEINCH_API_BASE = `https://api.1inch.io/v5.0/${CHAIN_ID}`;
 const ONEINCH_API_KEY = process.env.NEXT_PUBLIC_1INCH_API_KEY;
 
-// Common token addresses on Ethereum mainnet
+// Common token addresses on Sepolia testnet
 export const TOKEN_ADDRESSES = {
   ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-  WETH: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  USDC: "0xA0b86a33E6441b8c4C8C0E4A0b86a33E6441b8c4C",
-  DAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-  WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+  WETH: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", // Sepolia WETH
+  USDC: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Sepolia USDC
+  DAI: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357", // Sepolia DAI
+  WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // Placeholder
 } as const;
 
 export interface QuoteResponse {
@@ -111,8 +112,8 @@ export const use1inchApi = (): Use1inchApiReturn => {
       try {
         const { fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
 
-        // Convert amount to wei (assuming 18 decimals for simplicity)
-        const amountInWei = (parseFloat(amount) * Math.pow(10, 18)).toString();
+        // Use the amount as-is (already in wei format from parseUnits)
+        const amountInWei = amount;
 
         const response = await axios.get(`${ONEINCH_API_BASE}/quote`, {
           params: {
@@ -185,8 +186,8 @@ export const use1inchApi = (): Use1inchApiReturn => {
       try {
         const { fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
 
-        // Convert amount to wei (assuming 18 decimals for simplicity)
-        const amountInWei = (parseFloat(amount) * Math.pow(10, 18)).toString();
+        // Use the amount as-is (already in wei format from parseUnits)
+        const amountInWei = amount;
 
         const response = await axios.get(`${ONEINCH_API_BASE}/swap`, {
           params: {
