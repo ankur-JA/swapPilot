@@ -1,29 +1,130 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { ArrowsUpDownIcon } from "@heroicons/react/24/outline";
-import { Card, RouteVisualizer, SwapRoute, Token, TokenInput } from "~~/components/swappilot";
-import { useTransactor } from "~~/hooks/scaffold-eth/useTransactor";
+import { formatUnits, parseUnits } from "viem";
+import { useAccount, useSendTransaction } from "wagmi";
+import { Card, RouteVisualizer, Token, TokenInput } from "~~/components/swappilot";
 import { use1inchApi } from "~~/hooks/swappilot";
 
-const SwapPage: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-  const { getQuote, getSwapTransaction, isLoading: apiLoading, error: apiError } = use1inchApi();
-  const transactor = useTransactor();
+const Swap: NextPage = () => {
+  const { address } = useAccount();
+  const { sendTransactionAsync } = useSendTransaction();
 
-  // State for swap interface
   const [fromToken, setFromToken] = useState<Token | null>(null);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
-  const [swapRoute, setSwapRoute] = useState<SwapRoute | null>(null);
+  const [slippage, setSlippage] = useState(1);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
-  const [, setSwapTransaction] = useState<any>(null);
-  const [isExecutingSwap, setIsExecutingSwap] = useState(false);
+  const [isLoadingSwap, setIsLoadingSwap] = useState(false);
+  const [quote, setQuote] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Toggle swap direction
+  const { getQuote, getSwapTransaction } = use1inchApi();
+
+  // Default tokens
+  const defaultTokens: Token[] = [
+    {
+      symbol: "ETH",
+      name: "Ethereum",
+      address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      decimals: 18,
+      logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
+    },
+    {
+      symbol: "USDC",
+      name: "USD Coin",
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      decimals: 6,
+      logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+    },
+    {
+      symbol: "DAI",
+      name: "Dai Stablecoin",
+      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      decimals: 18,
+      logoURI: "https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+    },
+  ];
+
+  useEffect(() => {
+    if (defaultTokens.length > 0 && !fromToken) {
+      setFromToken(defaultTokens[0]);
+    }
+    if (defaultTokens.length > 1 && !toToken) {
+      setToToken(defaultTokens[1]);
+    }
+  }, [defaultTokens, fromToken, toToken]);
+
+  const handleGetQuote = async () => {
+    if (!fromToken || !toToken || !fromAmount || !address) {
+      setError("Please select tokens, enter amount, and connect wallet");
+      return;
+    }
+
+    setIsLoadingQuote(true);
+    setError(null);
+
+    try {
+      const amount = parseUnits(fromAmount, fromToken.decimals).toString();
+      const quoteData = await getQuote({
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        amount,
+        fromAddress: address,
+      });
+
+      if (quoteData) {
+        setQuote(quoteData);
+        setToAmount(formatUnits(BigInt(quoteData.toTokenAmount), toToken.decimals));
+      }
+    } catch (err) {
+      setError("Failed to get quote. Please try again.");
+      console.error("Quote error:", err);
+    } finally {
+      setIsLoadingQuote(false);
+    }
+  };
+
+  const handleSwap = async () => {
+    if (!fromToken || !toToken || !fromAmount || !address || !quote) {
+      setError("Please get a quote first");
+      return;
+    }
+
+    setIsLoadingSwap(true);
+    setError(null);
+
+    try {
+      const amount = parseUnits(fromAmount, fromToken.decimals).toString();
+      const swapData = await getSwapTransaction({
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        amount,
+        fromAddress: address,
+        slippage: slippage,
+      });
+
+      if (swapData) {
+        // Execute the swap transaction
+        const tx = await sendTransactionAsync({
+          to: swapData.tx.to as `0x${string}`,
+          data: swapData.tx.data as `0x${string}`,
+          value: BigInt(swapData.tx.value || "0"),
+        });
+
+        console.log("Swap transaction sent:", tx);
+        setError(null);
+      }
+    } catch (err) {
+      setError("Failed to execute swap. Please try again.");
+      console.error("Swap error:", err);
+    } finally {
+      setIsLoadingSwap(false);
+    }
+  };
+
   const handleSwapDirection = () => {
     const tempToken = fromToken;
     const tempAmount = fromAmount;
@@ -32,195 +133,142 @@ const SwapPage: NextPage = () => {
     setToToken(tempToken);
     setFromAmount(toAmount);
     setToAmount(tempAmount);
-    setSwapRoute(null); // Clear route when direction changes
-  };
-
-  // Get quote from 1inch API
-  const handleGetQuote = async () => {
-    if (!fromToken || !toToken || !fromAmount) return;
-
-    setIsLoadingQuote(true);
-
-    try {
-      const quote = await getQuote({
-        fromTokenAddress: fromToken.address,
-        toTokenAddress: toToken.address,
-        amount: fromAmount,
-        fromAddress: connectedAddress,
-        slippage: 1, // 1% slippage
-      });
-
-      if (quote) {
-        // Transform 1inch quote to our SwapRoute format
-        const route: SwapRoute = {
-          fromToken: quote.fromToken,
-          toToken: quote.toToken,
-          protocols: quote.protocols.map(p => ({
-            name: p.name,
-            part: p.part,
-          })),
-          estimatedGas: quote.estimatedGas,
-          priceImpact: quote.priceImpact,
-        };
-
-        setSwapRoute(route);
-        // Convert wei to token amount (simplified)
-        const toAmountFormatted = (parseFloat(quote.toTokenAmount) / Math.pow(10, quote.toToken.decimals)).toString();
-        setToAmount(toAmountFormatted);
-      }
-    } catch (error) {
-      console.error("Failed to get quote:", error);
-    } finally {
-      setIsLoadingQuote(false);
-    }
-  };
-
-  // Execute swap using 1inch API and Wagmi
-  const handleSwap = async () => {
-    if (!swapRoute || !fromToken || !toToken || !connectedAddress) return;
-
-    setIsExecutingSwap(true);
-
-    try {
-      // Get swap transaction from 1inch API
-      const swapTx = await getSwapTransaction({
-        fromTokenAddress: fromToken.address,
-        toTokenAddress: toToken.address,
-        amount: fromAmount,
-        fromAddress: connectedAddress,
-        slippage: 1, // 1% slippage
-      });
-
-      if (swapTx) {
-        setSwapTransaction(swapTx);
-
-        // Execute the transaction using the transactor
-        const txHash = await transactor({
-          to: swapTx.tx.to as `0x${string}`,
-          data: swapTx.tx.data as `0x${string}`,
-          value: BigInt(swapTx.tx.value),
-          gas: BigInt(swapTx.tx.gas),
-          gasPrice: BigInt(swapTx.tx.gasPrice),
-        });
-
-        if (txHash) {
-          console.log("Swap transaction submitted:", txHash);
-          // Reset form after successful swap
-          setFromAmount("");
-          setToAmount("");
-          setSwapRoute(null);
-          setSwapTransaction(null);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to execute swap:", error);
-    } finally {
-      setIsExecutingSwap(false);
-    }
+    setQuote(null);
   };
 
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5 w-full max-w-2xl">
-          <h1 className="text-center mb-8">
-            <span className="block text-4xl font-bold">Swap</span>
-            <span className="block text-lg text-accent mt-2">Trade tokens with the best rates</span>
-          </h1>
+    <div className="flex items-center flex-col grow pt-10">
+      <div className="px-5 w-full max-w-4xl">
+        <h1 className="text-center mb-8">
+          <span className="block text-2xl mb-2">SwapPilot</span>
+          <span className="block text-4xl font-bold">Smart Token Swapping</span>
+        </h1>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Swap Interface */}
-          <Card className="space-y-6">
-            {/* From Token Input */}
-            <TokenInput
-              label="From"
-              value={fromAmount}
-              onChange={setFromAmount}
-              selectedToken={fromToken}
-              onTokenSelect={setFromToken}
-              placeholder="0.0"
-            />
+          <div className="lg:col-span-2">
+            <Card className="p-6">
+              <div className="space-y-6">
+                {/* From Token */}
+                <TokenInput
+                  label="From"
+                  value={fromAmount}
+                  onChange={setFromAmount}
+                  selectedToken={fromToken}
+                  onTokenSelect={setFromToken}
+                  placeholder="0.0"
+                />
 
-            {/* Swap Direction Toggle */}
-            <div className="flex justify-center">
-              <button
-                onClick={handleSwapDirection}
-                className="btn btn-circle btn-primary"
-                disabled={!fromToken || !toToken}
-              >
-                <ArrowsUpDownIcon className="h-5 w-5" />
-              </button>
-            </div>
+                {/* Swap Direction Button */}
+                <div className="flex justify-center">
+                  <button onClick={handleSwapDirection} className="btn btn-circle btn-primary" type="button">
+                    ↕
+                  </button>
+                </div>
 
-            {/* To Token Input */}
-            <TokenInput
-              label="To"
-              value={toAmount}
-              onChange={setToAmount}
-              selectedToken={toToken}
-              onTokenSelect={setToToken}
-              placeholder="0.0"
-            />
+                {/* To Token */}
+                <TokenInput
+                  label="To"
+                  value={toAmount}
+                  onChange={setToAmount}
+                  selectedToken={toToken}
+                  onTokenSelect={setToToken}
+                  placeholder="0.0"
+                  disabled
+                />
 
-            {/* API Error Display */}
-            {apiError && (
-              <div className="alert alert-error">
-                <span>Error: {apiError}</span>
+                {/* Slippage Settings */}
+                <div className="flex items-center space-x-4">
+                  <label className="text-sm font-medium">Slippage:</label>
+                  <div className="flex space-x-2">
+                    {[0.5, 1, 3].map(value => (
+                      <button
+                        key={value}
+                        onClick={() => setSlippage(value)}
+                        className={`btn btn-sm ${slippage === value ? "btn-primary" : "btn-outline"}`}
+                        type="button"
+                      >
+                        {value}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Error Display */}
+                {error && (
+                  <div className="alert alert-error">
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex space-x-4">
+                  <button
+                    onClick={handleGetQuote}
+                    disabled={!fromToken || !toToken || !fromAmount || isLoadingQuote}
+                    className="btn btn-primary flex-1"
+                    type="button"
+                  >
+                    {isLoadingQuote ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Getting Quote...
+                      </>
+                    ) : (
+                      "Get Quote"
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleSwap}
+                    disabled={!quote || isLoadingSwap}
+                    className="btn btn-secondary flex-1"
+                    type="button"
+                  >
+                    {isLoadingSwap ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Swapping...
+                      </>
+                    ) : (
+                      "Confirm Swap"
+                    )}
+                  </button>
+                </div>
               </div>
-            )}
+            </Card>
+          </div>
 
-            {/* Get Quote Button */}
-            <button
-              onClick={handleGetQuote}
-              className="btn btn-primary w-full"
-              disabled={!fromToken || !toToken || !fromAmount || isLoadingQuote || apiLoading}
-            >
-              {isLoadingQuote || apiLoading ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Getting Quote...
-                </>
-              ) : (
-                "Get Quote"
-              )}
-            </button>
-
-            {/* Route Visualizer */}
-            <RouteVisualizer route={swapRoute} isLoading={isLoadingQuote} />
-
-            {/* Swap Button */}
-            <button
-              onClick={handleSwap}
-              className="btn btn-success w-full"
-              disabled={!swapRoute || !connectedAddress || isExecutingSwap || apiLoading}
-            >
-              {!connectedAddress ? (
-                "Connect Wallet to Swap"
-              ) : isExecutingSwap ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Executing Swap...
-                </>
-              ) : (
-                "Swap"
-              )}
-            </button>
-          </Card>
-
-          {/* Connection Status */}
-          {connectedAddress && (
-            <div className="mt-6 text-center">
-              <p className="text-sm text-accent">
-                Connected:{" "}
-                <span className="font-mono">
-                  {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}
-                </span>
-              </p>
-            </div>
-          )}
+          {/* Route Visualization */}
+          <div className="lg:col-span-1">
+            <RouteVisualizer
+              route={
+                quote
+                  ? {
+                      fromToken: { symbol: fromToken?.symbol || "", address: fromToken?.address || "" },
+                      toToken: { symbol: toToken?.symbol || "", address: toToken?.address || "" },
+                      protocols: quote.protocols || [],
+                      estimatedGas: quote.estimatedGas || "0",
+                      priceImpact: quote.priceImpact || 0,
+                    }
+                  : null
+              }
+              isLoading={isLoadingQuote}
+            />
+          </div>
         </div>
+
+        {/* Connection Status */}
+        {!address && (
+          <div className="mt-6 text-center">
+            <div className="alert alert-warning">
+              <span>Please connect your wallet to start swapping</span>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
-export default SwapPage;
+export default Swap;
