@@ -24,7 +24,6 @@ const Swap: NextPage = () => {
   const [toToken, setToToken] = useState<Token | null>(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
-  const [slippage, setSlippage] = useState(1);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isLoadingSwap, setIsLoadingSwap] = useState(false);
   const [quote, setQuote] = useState<any>(null);
@@ -152,7 +151,7 @@ const Swap: NextPage = () => {
         toTokenAddress: toToken.address,
         amount,
         fromAddress: address,
-        slippage: slippage,
+        slippage: 1, // Default slippage
       });
 
       if (swapData) {
@@ -240,23 +239,6 @@ const Swap: NextPage = () => {
                   placeholder="0.0"
                   readOnly={true}
                 />
-
-                {/* Slippage Settings */}
-                <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium">Slippage:</label>
-                  <div className="flex space-x-2">
-                    {[0.5, 1, 3].map(value => (
-                      <button
-                        key={value}
-                        onClick={() => setSlippage(value)}
-                        className={`btn btn-sm ${slippage === value ? "btn-primary" : "btn-outline"}`}
-                        type="button"
-                      >
-                        {value}%
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Error Display */}
                 {error && (
