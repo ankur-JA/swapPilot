@@ -17,6 +17,7 @@ interface TokenInputProps {
   onTokenSelect: (token: Token) => void;
   placeholder?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   label?: string;
 }
 
@@ -27,6 +28,7 @@ export const TokenInput = ({
   onTokenSelect,
   placeholder = "0.0",
   disabled = false,
+  readOnly = false,
   label,
 }: TokenInputProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,13 +46,13 @@ export const TokenInput = ({
         {/* Amount Input */}
         <input
           className={`input input-ghost focus-within:border-transparent focus:outline-hidden focus:bg-transparent h-[2.2rem] min-h-[2.2rem] px-4 border-0 w-full font-medium placeholder:text-accent/70 ${
-            disabled ? "text-base-content/50 cursor-not-allowed" : "text-base-content/70 focus:text-base-content/70"
+            readOnly ? "text-base-content/50 cursor-not-allowed" : "text-base-content/70 focus:text-base-content/70"
           }`}
           placeholder={placeholder}
           value={value}
           onChange={e => onChange(e.target.value)}
           disabled={disabled}
-          readOnly={disabled}
+          readOnly={readOnly}
           autoComplete="off"
           type="number"
         />

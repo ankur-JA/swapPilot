@@ -236,7 +236,7 @@ const Swap: NextPage = () => {
                   selectedToken={toToken}
                   onTokenSelect={setToToken}
                   placeholder="0.0"
-                  disabled={true}
+                  readOnly={true}
                 />
 
                 {/* Slippage Settings */}
@@ -328,22 +328,6 @@ const Swap: NextPage = () => {
             </div>
           </div>
         )}
-
-        {/* Network Warning */}
-        {address && (
-          <div className="mt-6 text-center">
-            <div className="alert alert-info">
-              <span>Make sure your wallet is connected to Sepolia testnet (Chain ID: 11155111)</span>
-            </div>
-          </div>
-        )}
-
-        {/* API Status */}
-        <div className="mt-4 text-center">
-          <div className="alert alert-warning">
-            <span>Note: Make sure you have added your 1inch API key to .env.local file</span>
-          </div>
-        </div>
       </div>
     </div>
   );
