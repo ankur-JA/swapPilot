@@ -1,80 +1,110 @@
-# 🏗 Scaffold-ETH 2
+# 🚀 SwapPilot
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+**The smartest way to swap crypto tokens**
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+SwapPilot is your all-in-one DeFi dashboard for intelligent token swapping, automated trading, and portfolio management. Get the best rates, set smart orders, and grow your crypto portfolio with ease.
 
-⚙️ Built using NextJS, RainbowKit, Foundry, Wagmi, Viem, and Typescript.
+## ✨ What Makes SwapPilot Special
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+- **🎯 Best Rates Guaranteed**: Automatically finds the best swap rates across all major DEXs
+- **⏰ Smart Limit Orders**: Set price alerts and execute trades automatically
+- **📅 DCA Made Easy**: Dollar-cost average your investments with scheduled purchases
+- **📊 Portfolio Insights**: Track your performance with real-time analytics
+- **🔒 Secure & Trusted**: Built on battle-tested smart contracts
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+## 🚀 Get Started in 3 Steps
 
-## Requirements
+### 1. Connect Your Wallet
+Click the "Connect Wallet" button and choose from MetaMask, WalletConnect, or other supported wallets.
 
-Before you begin, you need to install the following tools:
+### 2. Start Swapping
+- Select your tokens
+- Enter the amount
+- Get the best quote instantly
+- Execute your swap
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
+### 3. Explore Advanced Features
+- Set up limit orders for better prices
+- Schedule recurring DCA purchases
+- Track your portfolio performance
 
-## Quickstart
+## 💡 Key Features
 
-To get started with Scaffold-ETH 2, follow the steps below:
+### 🔄 Smart Swapping
+- **Multi-DEX Aggregation**: Searches across Uniswap, SushiSwap, and more
+- **Real-time Quotes**: Get instant price updates
+- **Slippage Protection**: Customizable slippage tolerance
+- **Gas Optimization**: Smart gas estimation
 
-1. Install dependencies if it was skipped in CLI:
+### ⏰ Limit Orders
+- **Price Targets**: Set exact buy/sell prices
+- **Automatic Execution**: Trades execute when conditions are met
+- **Order Management**: Track and modify your orders
+- **Price Alerts**: Get notified of price movements
 
-```
-cd my-dapp-example
-yarn install
-```
+### 📅 DCA Scheduler
+- **Recurring Purchases**: Set daily, weekly, or monthly schedules
+- **Multiple Strategies**: Run different DCA plans simultaneously
+- **Cost Averaging**: Reduce impact of market volatility
+- **Flexible Timing**: Choose your preferred execution times
 
-2. Run a local network in the first terminal:
+### 📊 Portfolio Tracking
+- **Real-time Valuation**: See your portfolio value live
+- **Performance Analytics**: Track your gains and losses
+- **Transaction History**: Complete record of all trades
+- **Export Data**: Download your trading data
 
-```
-yarn chain
-```
+## 🔧 Supported Networks
 
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
+- **Ethereum Mainnet**
+- **Polygon**
+- **Binance Smart Chain**
+- **Arbitrum**
+- **Optimism**
 
-3. On a second terminal, deploy the test contract:
+## 🛡️ Security & Trust
 
-```
-yarn deploy
-```
+- **Audited Smart Contracts**: All contracts are professionally audited
+- **Non-Custodial**: You always control your funds
+- **Open Source**: Transparent and verifiable code
+- **Insurance Coverage**: Protected by leading DeFi insurance protocols
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
+## 📱 How to Use
 
-4. On a third terminal, start your NextJS app:
+### Basic Swap
+1. Go to the **Swap** page
+2. Select your "From" and "To" tokens
+3. Enter the amount you want to swap
+4. Click "Get Quote" to see the best rate
+5. Click "Swap" to execute the transaction
 
-```
-yarn start
-```
+### Set a Limit Order
+1. Navigate to **Limit Orders**
+2. Choose your trading pair
+3. Set your target price
+4. Specify the amount
+5. Confirm and wait for execution
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+### Start DCA
+1. Visit the **DCA** page
+2. Select your investment tokens
+3. Set your schedule (daily/weekly/monthly)
+4. Choose the amount per purchase
+5. Activate your DCA strategy
 
-Run smart contract test with `yarn foundry:test`
+## 💰 Fees
 
-- Edit your smart contracts in `packages/foundry/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
+- **Swap Fees**: 0.1% + network gas fees
+- **Limit Orders**: 0.05% when executed
+- **DCA**: 0.02% per scheduled purchase
+- **Portfolio Tracking**: Free
 
+## 🆘 Need Help?
+- **Email**: [your-email@example.com](mailto:your-email@example.com)
+- **Discord**: [Connect with me on Discord](https://discord.gg/swappilot)
+- **Twitter**: [@gearhead_ETH](https://twitter.com/swappilot
 
-## Documentation
+## 🔗 Links
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
-
-To know more about its features, check out our [website](https://scaffoldeth.io).
-
-## Contributing to Scaffold-ETH 2
-
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+- [Live App](https://app.swappilot.io)
+- [GitHub](https://github.com/swappilot)
