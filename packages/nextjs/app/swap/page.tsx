@@ -232,10 +232,11 @@ const Swap: NextPage = () => {
                 <TokenInput
                   label="To"
                   value={toAmount}
-                  onChange={setToAmount}
+                  onChange={() => {}} // Read-only
                   selectedToken={toToken}
                   onTokenSelect={setToToken}
                   placeholder="0.0"
+                  disabled={true}
                 />
 
                 {/* Slippage Settings */}

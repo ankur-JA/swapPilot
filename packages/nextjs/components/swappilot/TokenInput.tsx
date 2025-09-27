@@ -43,11 +43,14 @@ export const TokenInput = ({
       <div className="flex border-2 border-base-300 bg-base-200 rounded-full text-accent">
         {/* Amount Input */}
         <input
-          className="input input-ghost focus-within:border-transparent focus:outline-hidden focus:bg-transparent h-[2.2rem] min-h-[2.2rem] px-4 border-0 w-full font-medium placeholder:text-accent/70 text-base-content/70 focus:text-base-content/70"
+          className={`input input-ghost focus-within:border-transparent focus:outline-hidden focus:bg-transparent h-[2.2rem] min-h-[2.2rem] px-4 border-0 w-full font-medium placeholder:text-accent/70 ${
+            disabled ? "text-base-content/50 cursor-not-allowed" : "text-base-content/70 focus:text-base-content/70"
+          }`}
           placeholder={placeholder}
           value={value}
           onChange={e => onChange(e.target.value)}
           disabled={disabled}
+          readOnly={disabled}
           autoComplete="off"
           type="number"
         />

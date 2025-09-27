@@ -82,7 +82,7 @@ export const TOKEN_ADDRESSES = {
 
 // Helper function to get 1inch API base URL for a chain
 export const get1inchApiBase = (chainId: number) => {
-  return `https://api.1inch.io/v5.0/${chainId}`;
+  return `https://api.1inch.dev/swap/v6.1/${chainId}`;
 };
 
 // Debug function to test API connectivity
