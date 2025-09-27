@@ -15,6 +15,22 @@ export const TOKEN_ADDRESSES = {
   WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // Placeholder
 } as const;
 
+// Debug function to test API connectivity
+export const testApiConnection = async () => {
+  try {
+    const response = await axios.get(`${ONEINCH_API_BASE}/tokens`, {
+      headers: {
+        ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
+      },
+    });
+    console.log("API connection test successful:", response.data);
+    return true;
+  } catch (error) {
+    console.error("API connection test failed:", error);
+    return false;
+  }
+};
+
 export interface QuoteResponse {
   fromToken: {
     symbol: string;

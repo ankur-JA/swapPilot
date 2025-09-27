@@ -5,7 +5,7 @@ import type { NextPage } from "next";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useSendTransaction } from "wagmi";
 import { Card, RouteVisualizer, Token, TokenInput } from "~~/components/swappilot";
-import { use1inchApi } from "~~/hooks/swappilot";
+import { testApiConnection, use1inchApi } from "~~/hooks/swappilot";
 
 const Swap: NextPage = () => {
   const { address } = useAccount();
@@ -23,7 +23,7 @@ const Swap: NextPage = () => {
 
   const { getQuote, getSwapTransaction } = use1inchApi();
 
-  // Default tokens for Sepolia testnet
+  // Default tokens for Sepolia testnet - Updated with verified addresses
   const defaultTokens: Token[] = useMemo(
     () => [
       {
@@ -65,6 +65,9 @@ const Swap: NextPage = () => {
     if (defaultTokens.length > 1 && !toToken) {
       setToToken(defaultTokens[1]);
     }
+
+    // Test API connection on component mount
+    testApiConnection();
   }, [defaultTokens, fromToken, toToken]);
 
   const handleGetQuote = async () => {
@@ -315,6 +318,13 @@ const Swap: NextPage = () => {
             </div>
           </div>
         )}
+
+        {/* API Status */}
+        <div className="mt-4 text-center">
+          <div className="alert alert-warning">
+            <span>Note: Make sure you have added your 1inch API key to .env.local file</span>
+          </div>
+        </div>
       </div>
     </div>
   );
