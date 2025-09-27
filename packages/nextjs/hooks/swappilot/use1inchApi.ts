@@ -220,9 +220,6 @@ export const use1inchApi = (): Use1inchApiReturn => {
             amount: amountInWei,
             walletAddress: fromAddress || "0x0000000000000000000000000000000000000000",
             enableEstimate: "false",
-            fee: "100",
-            isPermit2: "0x",
-            permit: "0x",
           },
           hasApiKey: !!ONEINCH_API_KEY,
         });
@@ -234,9 +231,6 @@ export const use1inchApi = (): Use1inchApiReturn => {
             amount: amountInWei,
             walletAddress: fromAddress || "0x0000000000000000000000000000000000000000",
             enableEstimate: "false",
-            fee: "100",
-            isPermit2: "0x",
-            permit: "0x",
           },
           headers: {
             ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
@@ -249,30 +243,24 @@ export const use1inchApi = (): Use1inchApiReturn => {
         // Transform the Fusion Quoter response to match our interface
         const quote: QuoteResponse = {
           fromToken: {
-            symbol: data.fromToken?.symbol || "Unknown",
-            name: data.fromToken?.name || "Unknown Token",
-            address: data.fromToken?.address || fromTokenAddress,
-            decimals: data.fromToken?.decimals || 18,
-            logoURI: data.fromToken?.logoURI,
+            symbol: "Unknown", // Fusion Quoter doesn't return token metadata
+            name: "Unknown Token",
+            address: fromTokenAddress,
+            decimals: 18, // Default to 18, would need separate call for actual decimals
+            logoURI: undefined,
           },
           toToken: {
-            symbol: data.toToken?.symbol || "Unknown",
-            name: data.toToken?.name || "Unknown Token",
-            address: data.toToken?.address || toTokenAddress,
-            decimals: data.toToken?.decimals || 18,
-            logoURI: data.toToken?.logoURI,
+            symbol: "Unknown", // Fusion Quoter doesn't return token metadata
+            name: "Unknown Token",
+            address: toTokenAddress,
+            decimals: 18, // Default to 18, would need separate call for actual decimals
+            logoURI: undefined,
           },
-          toTokenAmount: data.toTokenAmount || data.quote?.toTokenAmount || "0",
+          toTokenAmount: data.toTokenAmount || "0",
           fromTokenAmount: data.fromTokenAmount || amountInWei,
-          protocols:
-            data.protocols?.map((protocol: any) => ({
-              name: protocol.name || "Unknown Protocol",
-              part: protocol.part || 0,
-              fromTokenAddress: protocol.fromTokenAddress,
-              toTokenAddress: protocol.toTokenAddress,
-            })) || [],
-          estimatedGas: data.estimatedGas || data.quote?.estimatedGas || "0",
-          priceImpact: data.priceImpact ? parseFloat(data.priceImpact) : undefined,
+          protocols: [], // Fusion Quoter doesn't return protocol breakdown
+          estimatedGas: data.gas?.toString() || "0",
+          priceImpact: data.priceImpactPercent ? parseFloat(data.priceImpactPercent.toString()) : undefined,
         };
 
         return quote;
