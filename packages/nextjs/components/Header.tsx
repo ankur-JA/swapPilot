@@ -1,11 +1,19 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
-import { ArrowsRightLeftIcon, Bars3Icon, CalendarDaysIcon, ClockIcon, ChartBarIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowsRightLeftIcon,
+  Bars3Icon,
+  CalendarDaysIcon,
+  ChartBarIcon,
+  ClockIcon,
+  Cog6ToothIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
@@ -19,27 +27,27 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Swap",
     href: "/swap",
-    icon: <ArrowsRightLeftIcon className="h-4 w-4" />,
+    icon: <ArrowsRightLeftIcon className="h-5 w-5" />,
   },
   {
     label: "Limit Orders",
     href: "/limit-orders",
-    icon: <ClockIcon className="h-4 w-4" />,
+    icon: <ClockIcon className="h-5 w-5" />,
   },
   {
     label: "DCA",
     href: "/dca",
-    icon: <CalendarDaysIcon className="h-4 w-4" />,
+    icon: <CalendarDaysIcon className="h-5 w-5" />,
   },
   {
     label: "Portfolio",
     href: "/portfolio",
-    icon: <ChartBarIcon className="h-4 w-4" />,
+    icon: <ChartBarIcon className="h-5 w-5" />,
   },
   {
     label: "Settings",
     href: "/settings",
-    icon: <Cog6ToothIcon className="h-4 w-4" />,
+    icon: <Cog6ToothIcon className="h-5 w-5" />,
   },
 ];
 
@@ -55,9 +63,11 @@ export const HeaderMenuLinks = () => {
             <Link
               href={href}
               passHref
-              className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                isActive
+                  ? "bg-primary text-primary-content shadow-lg"
+                  : "text-base-content hover:bg-base-200 hover:text-primary"
+              }`}
             >
               {icon}
               <span>{label}</span>
@@ -75,44 +85,76 @@ export const HeaderMenuLinks = () => {
 export const Header = () => {
   const { targetNetwork } = useTargetNetwork();
   const isLocalNetwork = targetNetwork.id === hardhat.id;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const burgerMenuRef = useRef<HTMLDetailsElement>(null);
+  const burgerMenuRef = useRef<HTMLDivElement>(null);
   useOutsideClick(burgerMenuRef, () => {
-    burgerMenuRef?.current?.removeAttribute("open");
+    setIsMobileMenuOpen(false);
   });
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
-      <div className="navbar-start w-auto lg:w-1/2">
-        <details className="dropdown" ref={burgerMenuRef}>
-          <summary className="ml-1 btn btn-ghost lg:hidden hover:bg-transparent">
-            <Bars3Icon className="h-1/2" />
-          </summary>
-          <ul
-            className="menu menu-compact dropdown-content mt-3 p-2 shadow-sm bg-base-100 rounded-box w-52"
-            onClick={() => {
-              burgerMenuRef?.current?.removeAttribute("open");
-            }}
-          >
-            <HeaderMenuLinks />
-          </ul>
-        </details>
-        <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
-          <div className="flex relative w-10 h-10">
-            <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
+    <div className="sticky top-0 z-50 bg-base-100/80 backdrop-blur-md border-b border-base-300/50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="relative w-10 h-10">
+              <Image
+                alt="SwapPilot logo"
+                className="cursor-pointer transition-transform group-hover:scale-110"
+                fill
+                src="/logo.svg"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                SwapPilot
+              </span>
+              <span className="text-xs text-base-content/60 -mt-1">Smart Crypto Swapping</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <ul className="flex items-center space-x-1">
+              <HeaderMenuLinks />
+            </ul>
+          </nav>
+
+          {/* Connect Button & Mobile Menu */}
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:block">
+              <RainbowKitCustomConnectButton />
+              {isLocalNetwork && <FaucetButton />}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden" ref={burgerMenuRef}>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-xl hover:bg-base-200 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold leading-tight">SwapPilot</span>
-            <span className="text-xs">Smart crypto swapping</span>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-base-300/50 bg-base-100/95 backdrop-blur-md">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <ul className="space-y-1">
+                <HeaderMenuLinks />
+              </ul>
+              <div className="pt-4 border-t border-base-300/50">
+                <RainbowKitCustomConnectButton />
+                {isLocalNetwork && <FaucetButton />}
+              </div>
+            </div>
           </div>
-        </Link>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          <HeaderMenuLinks />
-        </ul>
-      </div>
-      <div className="navbar-end grow mr-4">
-        <RainbowKitCustomConnectButton />
-        {isLocalNetwork && <FaucetButton />}
+        )}
       </div>
     </div>
   );

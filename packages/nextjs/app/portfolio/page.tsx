@@ -17,7 +17,8 @@ const PortfolioPage: NextPage = () => {
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold mb-4">Coming Soon</h2>
               <p className="text-accent text-lg">
-                Portfolio tracking functionality will be built here. This feature will provide comprehensive analytics and insights for your crypto investments.
+                Portfolio tracking functionality will be built here. This feature will provide comprehensive analytics
+                and insights for your crypto investments.
               </p>
               <div className="mt-8 space-y-2 text-sm text-base-content/70">
                 <p>• Real-time portfolio valuation</p>

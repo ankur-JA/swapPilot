@@ -17,7 +17,8 @@ const SettingsPage: NextPage = () => {
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold mb-4">Coming Soon</h2>
               <p className="text-accent text-lg">
-                Settings and configuration options will be built here. This feature will allow you to customize your SwapPilot experience.
+                Settings and configuration options will be built here. This feature will allow you to customize your
+                SwapPilot experience.
               </p>
               <div className="mt-8 space-y-2 text-sm text-base-content/70">
                 <p>• Slippage tolerance settings</p>
