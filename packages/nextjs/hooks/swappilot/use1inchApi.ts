@@ -3,6 +3,7 @@ import axios from "axios";
 
 // 1inch API base URL
 const ONEINCH_API_BASE = "https://api.1inch.io/v5.0/1";
+const ONEINCH_API_KEY = process.env.NEXT_PUBLIC_1INCH_API_KEY;
 
 // Common token addresses on Ethereum mainnet
 export const TOKEN_ADDRESSES = {
@@ -86,6 +87,8 @@ export interface Use1inchApiReturn {
     fromAddress: string;
     slippage?: number;
   }) => Promise<SwapTransactionResponse | null>;
+  getTokens: () => Promise<any>;
+  getWalletBalances: (address: string) => Promise<any>;
   isLoading: boolean;
   error: string | null;
 }
@@ -118,6 +121,9 @@ export const use1inchApi = (): Use1inchApiReturn => {
             amount: amountInWei,
             ...(fromAddress && { fromAddress }),
             slippage,
+          },
+          headers: {
+            ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
           },
         });
 
@@ -190,6 +196,9 @@ export const use1inchApi = (): Use1inchApiReturn => {
             fromAddress,
             slippage,
           },
+          headers: {
+            ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
+          },
         });
 
         const data = response.data;
@@ -240,9 +249,58 @@ export const use1inchApi = (): Use1inchApiReturn => {
     [],
   );
 
+  const getTokens = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`${ONEINCH_API_BASE}/tokens`, {
+        headers: {
+          ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
+        },
+      });
+
+      return response.data;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.description || err.message || "Failed to get tokens";
+      setError(errorMessage);
+      console.error("1inch API Error:", err);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const getWalletBalances = useCallback(async (address: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`${ONEINCH_API_BASE}/wallet/balances`, {
+        params: {
+          address,
+        },
+        headers: {
+          ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
+        },
+      });
+
+      return response.data;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.description || err.message || "Failed to get wallet balances";
+      setError(errorMessage);
+      console.error("1inch API Error:", err);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     getQuote,
     getSwapTransaction,
+    getTokens,
+    getWalletBalances,
     isLoading,
     error,
   };

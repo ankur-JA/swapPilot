@@ -14,19 +14,19 @@ SwapPilot is your all-in-one DeFi dashboard for intelligent token swapping, auto
 
 ## 🚀 Get Started in 3 Steps
 
-### 1. Connect Your Wallet
+### 1. Get Your API Key
+- Visit [1inch Developer Portal](https://portal.1inch.dev/)
+- Sign up and get your free API key
+- See [API Setup Guide](API_SETUP.md) for configuration
+
+### 2. Connect Your Wallet
 Click the "Connect Wallet" button and choose from MetaMask, WalletConnect, or other supported wallets.
 
-### 2. Start Swapping
+### 3. Start Swapping
 - Select your tokens
 - Enter the amount
 - Get the best quote instantly
 - Execute your swap
-
-### 3. Explore Advanced Features
-- Set up limit orders for better prices
-- Schedule recurring DCA purchases
-- Track your portfolio performance
 
 ## 💡 Key Features
 
