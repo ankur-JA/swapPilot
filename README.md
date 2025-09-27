@@ -100,11 +100,11 @@ Click the "Connect Wallet" button and choose from MetaMask, WalletConnect, or ot
 - **Portfolio Tracking**: Free
 
 ## 🆘 Need Help?
-- **Email**: [gearhead.qq@gmail.com](mailto:your-email@example.com)
-- **Discord**: [Connect with me on Discord](https://discord.gg/gearhead3264)
+- **Email**: [gearhead.qq@gmail.com](mailto:gearhead.qq@gmail.com)
+- **Discord**: [Connect with me on Discord](https://discord.gg/gearhead#3264)
 - **Twitter**: [@gearhead_ETH](https://twitter.com/gearhead_ETH)
 
 ## 🔗 Links
 
 - [Live App](https://app.swappilot.io)
-- [GitHub](https://github.com/swappilot)
+- [GitHub](https://github.com/ankur-JA/swapPilot.git)
