@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useSendTransaction } from "wagmi";
@@ -24,36 +24,39 @@ const Swap: NextPage = () => {
   const { getQuote, getSwapTransaction } = use1inchApi();
 
   // Default tokens for Sepolia testnet
-  const defaultTokens: Token[] = [
-    {
-      symbol: "ETH",
-      name: "Ethereum",
-      address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      decimals: 18,
-      logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
-    },
-    {
-      symbol: "WETH",
-      name: "Wrapped Ethereum",
-      address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-      decimals: 18,
-      logoURI: "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
-    },
-    {
-      symbol: "USDC",
-      name: "USD Coin",
-      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-      decimals: 6,
-      logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
-    },
-    {
-      symbol: "DAI",
-      name: "Dai Stablecoin",
-      address: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357",
-      decimals: 18,
-      logoURI: "https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
-    },
-  ];
+  const defaultTokens: Token[] = useMemo(
+    () => [
+      {
+        symbol: "ETH",
+        name: "Ethereum",
+        address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        decimals: 18,
+        logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
+      },
+      {
+        symbol: "WETH",
+        name: "Wrapped Ethereum",
+        address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        decimals: 18,
+        logoURI: "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+      },
+      {
+        symbol: "USDC",
+        name: "USD Coin",
+        address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        decimals: 6,
+        logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+      },
+      {
+        symbol: "DAI",
+        name: "Dai Stablecoin",
+        address: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357",
+        decimals: 18,
+        logoURI: "https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (defaultTokens.length > 0 && !fromToken) {
@@ -67,6 +70,11 @@ const Swap: NextPage = () => {
   const handleGetQuote = async () => {
     if (!fromToken || !toToken || !fromAmount || !address) {
       setError("Please select tokens, enter amount, and connect wallet");
+      return;
+    }
+
+    if (parseFloat(fromAmount) <= 0) {
+      setError("Please enter a valid amount");
       return;
     }
 
@@ -85,9 +93,12 @@ const Swap: NextPage = () => {
       if (quoteData) {
         setQuote(quoteData);
         setToAmount(formatUnits(BigInt(quoteData.toTokenAmount), toToken.decimals));
+      } else {
+        setError("No quote available for this swap");
       }
-    } catch (err) {
-      setError("Failed to get quote. Please try again.");
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.description || err?.message || "Failed to get quote. Please try again.";
+      setError(errorMessage);
       console.error("Quote error:", err);
     } finally {
       setIsLoadingQuote(false);
@@ -123,9 +134,18 @@ const Swap: NextPage = () => {
 
         console.log("Swap transaction sent:", tx);
         setError(null);
+
+        // Reset form after successful swap
+        setFromAmount("");
+        setToAmount("");
+        setQuote(null);
+      } else {
+        setError("Failed to generate swap transaction");
       }
-    } catch (err) {
-      setError("Failed to execute swap. Please try again.");
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.description || err?.message || "Failed to execute swap. Please try again.";
+      setError(errorMessage);
       console.error("Swap error:", err);
     } finally {
       setIsLoadingSwap(false);
