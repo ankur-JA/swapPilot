@@ -4,13 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useSendTransaction } from "wagmi";
-import { Card, RouteVisualizer, Token, TokenInput } from "~~/components/swappilot";
-import { testApiConnection, use1inchApi } from "~~/hooks/swappilot";
+import {
+  Card,
+  Chain,
+  ChainSelector,
+  RouteVisualizer,
+  SUPPORTED_CHAINS,
+  Token,
+  TokenInput,
+} from "~~/components/swappilot";
+import { TOKEN_ADDRESSES, testApiConnection, use1inchApi } from "~~/hooks/swappilot";
 
 const Swap: NextPage = () => {
   const { address } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
 
+  const [selectedChain, setSelectedChain] = useState<Chain>(SUPPORTED_CHAINS[0]); // Default to Ethereum Mainnet
   const [fromToken, setFromToken] = useState<Token | null>(null);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [fromAmount, setFromAmount] = useState("");
@@ -23,40 +32,40 @@ const Swap: NextPage = () => {
 
   const { getQuote, getSwapTransaction } = use1inchApi();
 
-  // Default tokens for Sepolia testnet - Updated with verified addresses
-  const defaultTokens: Token[] = useMemo(
-    () => [
+  // Default tokens based on selected chain
+  const defaultTokens: Token[] = useMemo(() => {
+    const chainTokens = TOKEN_ADDRESSES[selectedChain.id as keyof typeof TOKEN_ADDRESSES];
+    return [
       {
         symbol: "ETH",
         name: "Ethereum",
-        address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        address: chainTokens.ETH,
         decimals: 18,
         logoURI: "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
       },
       {
         symbol: "WETH",
         name: "Wrapped Ethereum",
-        address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        address: chainTokens.WETH,
         decimals: 18,
         logoURI: "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
       },
       {
         symbol: "USDC",
         name: "USD Coin",
-        address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        address: chainTokens.USDC,
         decimals: 6,
         logoURI: "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
       },
       {
         symbol: "DAI",
         name: "Dai Stablecoin",
-        address: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357",
+        address: chainTokens.DAI,
         decimals: 18,
         logoURI: "https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
       },
-    ],
-    [],
-  );
+    ];
+  }, [selectedChain.id]);
 
   useEffect(() => {
     if (defaultTokens.length > 0 && !fromToken) {
@@ -67,8 +76,8 @@ const Swap: NextPage = () => {
     }
 
     // Test API connection on component mount
-    testApiConnection();
-  }, [defaultTokens, fromToken, toToken]);
+    testApiConnection(selectedChain.id);
+  }, [defaultTokens, fromToken, toToken, selectedChain.id]);
 
   const handleGetQuote = async () => {
     if (!fromToken || !toToken || !fromAmount || !address) {
@@ -88,6 +97,7 @@ const Swap: NextPage = () => {
       const amount = parseUnits(fromAmount, fromToken.decimals).toString();
 
       console.log("Getting quote with params:", {
+        chainId: selectedChain.id,
         fromTokenAddress: fromToken.address,
         toTokenAddress: toToken.address,
         amount,
@@ -95,6 +105,7 @@ const Swap: NextPage = () => {
       });
 
       const quoteData = await getQuote({
+        chainId: selectedChain.id,
         fromTokenAddress: fromToken.address,
         toTokenAddress: toToken.address,
         amount,
@@ -134,6 +145,7 @@ const Swap: NextPage = () => {
     try {
       const amount = parseUnits(fromAmount, fromToken.decimals).toString();
       const swapData = await getSwapTransaction({
+        chainId: selectedChain.id,
         fromTokenAddress: fromToken.address,
         toTokenAddress: toToken.address,
         amount,
@@ -193,6 +205,12 @@ const Swap: NextPage = () => {
           <div className="lg:col-span-2">
             <Card className="p-6">
               <div className="space-y-6">
+                {/* Chain Selector */}
+                <div className="flex flex-col space-y-2">
+                  <label className="text-lg font-semibold text-base-content">Network</label>
+                  <ChainSelector selectedChain={selectedChain} onChainSelect={setSelectedChain} />
+                </div>
+
                 {/* From Token */}
                 <TokenInput
                   label="From"

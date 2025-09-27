@@ -1,24 +1,39 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 
-// 1inch API base URL - Using Sepolia testnet (chainId: 11155111)
-const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "11155111";
-const ONEINCH_API_BASE = `https://api.1inch.io/v5.0/${CHAIN_ID}`;
+// 1inch API key
 const ONEINCH_API_KEY = process.env.NEXT_PUBLIC_1INCH_API_KEY;
 
-// Common token addresses on Sepolia testnet
+// Token addresses for different chains
 export const TOKEN_ADDRESSES = {
-  ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-  WETH: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", // Sepolia WETH
-  USDC: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Sepolia USDC
-  DAI: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357", // Sepolia DAI
-  WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // Placeholder
+  // Ethereum Mainnet (chainId: 1)
+  1: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0xC02aaA39b223FE8D0A0e5C4F27EAD9083C756Cc2",
+    USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    DAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+  },
+  // Optimism (chainId: 10)
+  10: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x4200000000000000000000000000000000000006",
+    USDC: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+    DAI: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+    WBTC: "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
+  },
 } as const;
 
+// Helper function to get 1inch API base URL for a chain
+export const get1inchApiBase = (chainId: number) => {
+  return `https://api.1inch.io/v5.0/${chainId}`;
+};
+
 // Debug function to test API connectivity
-export const testApiConnection = async () => {
+export const testApiConnection = async (chainId: number = 1) => {
   try {
-    const response = await axios.get(`${ONEINCH_API_BASE}/tokens`, {
+    const apiBase = get1inchApiBase(chainId);
+    const response = await axios.get(`${apiBase}/tokens`, {
       headers: {
         ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
       },
@@ -91,6 +106,7 @@ export interface SwapTransactionResponse {
 
 export interface Use1inchApiReturn {
   getQuote: (params: {
+    chainId: number;
     fromTokenAddress: string;
     toTokenAddress: string;
     amount: string;
@@ -98,14 +114,15 @@ export interface Use1inchApiReturn {
     slippage?: number;
   }) => Promise<QuoteResponse | null>;
   getSwapTransaction: (params: {
+    chainId: number;
     fromTokenAddress: string;
     toTokenAddress: string;
     amount: string;
     fromAddress: string;
     slippage?: number;
   }) => Promise<SwapTransactionResponse | null>;
-  getTokens: () => Promise<any>;
-  getWalletBalances: (address: string) => Promise<any>;
+  getTokens: (chainId: number) => Promise<any>;
+  getWalletBalances: (chainId: number, address: string) => Promise<any>;
   isLoading: boolean;
   error: string | null;
 }
@@ -116,6 +133,7 @@ export const use1inchApi = (): Use1inchApiReturn => {
 
   const getQuote = useCallback(
     async (params: {
+      chainId: number;
       fromTokenAddress: string;
       toTokenAddress: string;
       amount: string;
@@ -126,13 +144,15 @@ export const use1inchApi = (): Use1inchApiReturn => {
       setError(null);
 
       try {
-        const { fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
+        const { chainId, fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
 
         // Use the amount as-is (already in wei format from parseUnits)
         const amountInWei = amount;
+        const apiBase = get1inchApiBase(chainId);
 
         console.log("1inch API request:", {
-          url: `${ONEINCH_API_BASE}/quote`,
+          url: `${apiBase}/quote`,
+          chainId,
           params: {
             fromTokenAddress,
             toTokenAddress,
@@ -143,7 +163,7 @@ export const use1inchApi = (): Use1inchApiReturn => {
           hasApiKey: !!ONEINCH_API_KEY,
         });
 
-        const response = await axios.get(`${ONEINCH_API_BASE}/quote`, {
+        const response = await axios.get(`${apiBase}/quote`, {
           params: {
             fromTokenAddress,
             toTokenAddress,
@@ -203,6 +223,7 @@ export const use1inchApi = (): Use1inchApiReturn => {
 
   const getSwapTransaction = useCallback(
     async (params: {
+      chainId: number;
       fromTokenAddress: string;
       toTokenAddress: string;
       amount: string;
@@ -213,12 +234,13 @@ export const use1inchApi = (): Use1inchApiReturn => {
       setError(null);
 
       try {
-        const { fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
+        const { chainId, fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
 
         // Use the amount as-is (already in wei format from parseUnits)
         const amountInWei = amount;
+        const apiBase = get1inchApiBase(chainId);
 
-        const response = await axios.get(`${ONEINCH_API_BASE}/swap`, {
+        const response = await axios.get(`${apiBase}/swap`, {
           params: {
             fromTokenAddress,
             toTokenAddress,
@@ -279,12 +301,13 @@ export const use1inchApi = (): Use1inchApiReturn => {
     [],
   );
 
-  const getTokens = useCallback(async () => {
+  const getTokens = useCallback(async (chainId: number) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.get(`${ONEINCH_API_BASE}/tokens`, {
+      const apiBase = get1inchApiBase(chainId);
+      const response = await axios.get(`${apiBase}/tokens`, {
         headers: {
           ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
         },
@@ -301,12 +324,13 @@ export const use1inchApi = (): Use1inchApiReturn => {
     }
   }, []);
 
-  const getWalletBalances = useCallback(async (address: string) => {
+  const getWalletBalances = useCallback(async (chainId: number, address: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.get(`${ONEINCH_API_BASE}/wallet/balances`, {
+      const apiBase = get1inchApiBase(chainId);
+      const response = await axios.get(`${apiBase}/wallet/balances`, {
         params: {
           address,
         },
