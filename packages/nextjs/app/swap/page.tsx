@@ -293,6 +293,15 @@ const Swap: NextPage = () => {
             </div>
           </div>
         )}
+
+        {/* Network Warning */}
+        {address && (
+          <div className="mt-6 text-center">
+            <div className="alert alert-info">
+              <span>Make sure your wallet is connected to Sepolia testnet (Chain ID: 11155111)</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
