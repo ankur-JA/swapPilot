@@ -85,6 +85,11 @@ export const get1inchApiBase = (chainId: number) => {
   return `https://api.1inch.dev/swap/v6.1/${chainId}`;
 };
 
+// Helper function to get Fusion Quoter API base URL for a chain
+export const getFusionQuoterApiBase = (chainId: number) => {
+  return `https://api.1inch.dev/fusion/quoter/v2.0/${chainId}`;
+};
+
 // Debug function to test API connectivity
 export const testApiConnection = async (chainId: number) => {
   try {
@@ -200,32 +205,38 @@ export const use1inchApi = (): Use1inchApiReturn => {
       setError(null);
 
       try {
-        const { chainId, fromTokenAddress, toTokenAddress, amount, fromAddress, slippage = 1 } = params;
+        const { chainId, fromTokenAddress, toTokenAddress, amount, fromAddress } = params;
 
         // Use the amount as-is (already in wei format from parseUnits)
         const amountInWei = amount;
-        const apiBase = get1inchApiBase(chainId);
+        const apiBase = getFusionQuoterApiBase(chainId);
 
-        console.log("1inch API request:", {
-          url: `${apiBase}/quote`,
+        console.log("1inch Fusion Quoter API request:", {
+          url: `${apiBase}/quote/receive`,
           chainId,
           params: {
             fromTokenAddress,
             toTokenAddress,
             amount: amountInWei,
-            ...(fromAddress && { fromAddress }),
-            slippage,
+            walletAddress: fromAddress || "0x0000000000000000000000000000000000000000",
+            enableEstimate: "false",
+            fee: "100",
+            isPermit2: "0x",
+            permit: "0x",
           },
           hasApiKey: !!ONEINCH_API_KEY,
         });
 
-        const response = await axios.get(`${apiBase}/quote`, {
+        const response = await axios.get(`${apiBase}/quote/receive`, {
           params: {
             fromTokenAddress,
             toTokenAddress,
             amount: amountInWei,
-            ...(fromAddress && { fromAddress }),
-            slippage,
+            walletAddress: fromAddress || "0x0000000000000000000000000000000000000000",
+            enableEstimate: "false",
+            fee: "100",
+            isPermit2: "0x",
+            permit: "0x",
           },
           headers: {
             ...(ONEINCH_API_KEY && { Authorization: `Bearer ${ONEINCH_API_KEY}` }),
@@ -233,9 +244,9 @@ export const use1inchApi = (): Use1inchApiReturn => {
         });
 
         const data = response.data;
-        console.log("1inch API response:", data);
+        console.log("1inch Fusion Quoter API response:", data);
 
-        // Transform the response to match our interface
+        // Transform the Fusion Quoter response to match our interface
         const quote: QuoteResponse = {
           fromToken: {
             symbol: data.fromToken?.symbol || "Unknown",
@@ -251,8 +262,8 @@ export const use1inchApi = (): Use1inchApiReturn => {
             decimals: data.toToken?.decimals || 18,
             logoURI: data.toToken?.logoURI,
           },
-          toTokenAmount: data.toTokenAmount,
-          fromTokenAmount: data.fromTokenAmount,
+          toTokenAmount: data.toTokenAmount || data.quote?.toTokenAmount || "0",
+          fromTokenAmount: data.fromTokenAmount || amountInWei,
           protocols:
             data.protocols?.map((protocol: any) => ({
               name: protocol.name || "Unknown Protocol",
@@ -260,7 +271,7 @@ export const use1inchApi = (): Use1inchApiReturn => {
               fromTokenAddress: protocol.fromTokenAddress,
               toTokenAddress: protocol.toTokenAddress,
             })) || [],
-          estimatedGas: data.estimatedGas || "0",
+          estimatedGas: data.estimatedGas || data.quote?.estimatedGas || "0",
           priceImpact: data.priceImpact ? parseFloat(data.priceImpact) : undefined,
         };
 
