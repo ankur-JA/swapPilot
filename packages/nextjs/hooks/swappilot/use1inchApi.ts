@@ -22,6 +22,62 @@ export const TOKEN_ADDRESSES = {
     DAI: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
     WBTC: "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
   },
+  // Arbitrum (chainId: 42161)
+  42161: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    DAI: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+    WBTC: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+  },
+  // Avalanche (chainId: 43114)
+  43114: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
+    USDC: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    DAI: "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70",
+    WBTC: "0x50b7545627a5162F82A992c33b87aDc75187B218",
+  },
+  // Base (chainId: 8453)
+  8453: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x4200000000000000000000000000000000000006",
+    USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    DAI: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+    WBTC: "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22",
+  },
+  // Binance Smart Chain (chainId: 56)
+  56: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    DAI: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+    WBTC: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+  },
+  // ZkSync Era (chainId: 324)
+  324: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
+    USDC: "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+    DAI: "0x4B9eb6c0b6ea15176BBF62841C6B2A8a398cb656",
+    WBTC: "0xBBeB516fb02a01611cBBE0453Fe3c580C3d48D43",
+  },
+  // Gnosis (chainId: 100)
+  100: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
+    USDC: "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
+    DAI: "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
+    WBTC: "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252",
+  },
+  // Polygon (chainId: 137)
+  137: {
+    ETH: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    WETH: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+    USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    DAI: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+    WBTC: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+  },
 } as const;
 
 // Helper function to get 1inch API base URL for a chain
