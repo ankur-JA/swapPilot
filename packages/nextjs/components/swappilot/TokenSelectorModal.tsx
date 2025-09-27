@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ChangeEvent, useState } from "react";
 import { Token } from "./TokenInput";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 type TokenSelectorModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSelectToken: (token: Token) => void;
-  selectedToken?: Token | null;
 };
 
 // Hardcoded popular tokens for now
@@ -43,12 +42,13 @@ const POPULAR_TOKENS: Token[] = [
   },
 ];
 
-export const TokenSelectorModal = ({ isOpen, onClose, onSelectToken, selectedToken }: TokenSelectorModalProps) => {
+export const TokenSelectorModal = ({ isOpen, onClose, onSelectToken }: TokenSelectorModalProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTokens = POPULAR_TOKENS.filter(token =>
-    token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    token.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTokens = POPULAR_TOKENS.filter(
+    token =>
+      token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      token.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (!isOpen) return null;
@@ -80,9 +80,7 @@ export const TokenSelectorModal = ({ isOpen, onClose, onSelectToken, selectedTok
                     className="flex items-center gap-3 p-2 w-full hover:bg-base-200 rounded-lg transition-colors"
                     onClick={() => onSelectToken(token)}
                   >
-                    {token.logoURI && (
-                      <img src={token.logoURI} alt={token.symbol} className="h-8 w-8 rounded-full" />
-                    )}
+                    {token.logoURI && <img src={token.logoURI} alt={token.symbol} className="h-8 w-8 rounded-full" />}
                     <div>
                       <p className="font-semibold">{token.symbol}</p>
                       <p className="text-sm text-accent-content">{token.name}</p>
