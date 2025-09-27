@@ -100,9 +100,9 @@ Click the "Connect Wallet" button and choose from MetaMask, WalletConnect, or ot
 - **Portfolio Tracking**: Free
 
 ## 🆘 Need Help?
-- **Email**: [your-email@example.com](mailto:your-email@example.com)
-- **Discord**: [Connect with me on Discord](https://discord.gg/swappilot)
-- **Twitter**: [@gearhead_ETH](https://twitter.com/swappilot
+- **Email**: [gearhead.qq@gmail.com](mailto:your-email@example.com)
+- **Discord**: [Connect with me on Discord](https://discord.gg/gearhead3264)
+- **Twitter**: [@gearhead_ETH](https://twitter.com/gearhead_ETH)
 
 ## 🔗 Links
 
