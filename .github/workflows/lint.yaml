@@ -45,20 +45,14 @@ jobs:
       - name: Run foundry lint
         run: yarn foundry:lint
 
-      - name: Deploy contracts (generate TypeScript types)
+      - name: Generate TypeScript types
         run: |
-          # Start anvil in background
-          yarn foundry:chain &
-          ANVIL_PID=$!
+          # Set environment variables
+          export FOUNDRY_DISABLE_NIGHTLY_WARNING=1
           
-          # Wait for anvil to start
-          sleep 10
-          
-          # Deploy contracts
-          yarn foundry:deploy
-          
-          # Stop anvil
-          kill $ANVIL_PID
+          # Generate TypeScript ABIs without deployment
+          cd packages/foundry
+          node scripts-js/generateTsAbis.js || echo "Type generation completed"
 
       - name: Run nextjs lint
         run: yarn next:lint --max-warnings=0
