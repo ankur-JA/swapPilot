@@ -116,7 +116,9 @@ const Swap: NextPage = () => {
 
       if (quoteData) {
         setQuote(quoteData);
-        setToAmount(formatUnits(BigInt(quoteData.toTokenAmount), toToken.decimals));
+        const toAmountFormatted = formatUnits(BigInt(quoteData.toTokenAmount), quoteData.toToken.decimals);
+        setToAmount(toAmountFormatted);
+        console.log("Quote successful - To amount:", toAmountFormatted);
       } else {
         setError("No quote available for this swap");
       }
